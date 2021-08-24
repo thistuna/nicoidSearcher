@@ -23,8 +23,13 @@ namespace nicoidSearch
             toolStripProgressBar1.Visible = false;
         }
 
+        List<VideoInfo> videoInfos = new List<VideoInfo>();
+
         private void buttonLoad_Click(object sender, EventArgs e)
         {
+            videoInfos.Clear();
+            listView1.Items.Clear();
+
             toolStripStatusLabel1.Visible = true;
             toolStripProgressBar1.Visible = true;
             var filelist = System.IO.Directory.GetFiles(textBoxDirectory.Text, "*.json");
@@ -40,9 +45,7 @@ namespace nicoidSearch
 
                 try
                 {
-                    var info = NicoidJson.Load(filelist[i]);
-
-                    listView1.Items.Add(new ListViewItem(new string[] { info.id, info.title }));
+                    videoInfos.Add(NicoidJson.Load(filelist[i]));
                 }
                 catch { }
 
@@ -55,7 +58,25 @@ namespace nicoidSearch
 
         private void buttonSearch_Click(object sender, EventArgs e)
         {
+            listView1.Items.Clear();
 
+            toolStripStatusLabel1.Visible = true;
+            toolStripProgressBar1.Visible = true;
+
+            int filenum = videoInfos.Count;
+            toolStripProgressBar1.Maximum = filenum - 1;
+
+            for (int i = 0; i < filenum; i++){
+                toolStripStatusLabel1.Text = i.ToString() + "/" + filenum.ToString();
+                toolStripProgressBar1.Value = i;
+                statusStrip1.Update();
+
+                if(videoInfos[i].title.Contains(textBoxTitle.Text))
+                listView1.Items.Add(new ListViewItem(new string[] { videoInfos[i].id, videoInfos[i].title }));
+                Application.DoEvents();
+            }
+            toolStripStatusLabel1.Visible = false;
+            toolStripProgressBar1.Visible = false;
         }
     }
 }
